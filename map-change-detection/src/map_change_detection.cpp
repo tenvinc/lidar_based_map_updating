@@ -50,7 +50,7 @@ MapChangeDetection::MapChangeDetection(ros::NodeHandle* nodehandle) :	nh_(*nodeh
 	nh_.getParam("pairing_distance_saturation", dist_saturation);
 	m_pairing = (pair_dist1 - pair_dist2) / (range1 - range2);
 	q_pairing = pair_dist1 - m_pairing * range1;
-	
+
 	nh_.getParam("final_chunk_skip_fraction", skip_fraction);
 	nh_.getParam("skip_fraction_false_positive", skip_fraction_fp);
 	nh_.getParam("min_chunk_skip_length", min_skip_length);
@@ -74,11 +74,11 @@ MapChangeDetection::MapChangeDetection(ros::NodeHandle* nodehandle) :	nh_(*nodeh
 
 	nh_.getParam("max_anomalous_beam_fraction", max_anom_beam_frac);
 
-	sub_odom = nh_.subscribe(odom_topic, 1, &MapChangeDetection::odomCallback, this);  
+	sub_odom = nh_.subscribe(odom_topic, 1, &MapChangeDetection::odomCallback, this);
 
 	nh_.getParam("update_map_online", online_update);
 
-	update_map_service = nh_.advertiseService("update_map", &MapChangeDetection::serviceCallback, this);  
+	update_map_service = nh_.advertiseService("update_map", &MapChangeDetection::serviceCallback, this);
 
 	if (visualization_mode || debug_visualization)
 		initializeRvizStuff(map_frame);
@@ -363,7 +363,7 @@ void MapChangeDetection::resetUpdateLogic(const ros::Time& time) {
 	// time taken as input is considered in order to trigger the next transition of 'enough_time_elapsed' flag
 	last_processed_time = time;
 	enough_time_elapsed = false;
-	
+
 	// new odom pose has to be retrieved, and the robot has to move in order to trigger the next scan processing
 	update_last_odom = true;
 	robot_moved_enough = false;
@@ -374,8 +374,8 @@ void MapChangeDetection::resetUpdateLogic(const ros::Time& time) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 boost::optional<Vector2<double>> MapChangeDetection::computeVirtualHitPoint(const int& idx, const Vector2<double>& pose_world, const Vector2<int32_t>& pose_grid) {
-					
-	double th = idx * scan_handler->getScan().angle_increment / vm_ratio + scan_handler->getScan().angle_min + scan_handler->getPose().theta;
+
+	double th = scan_handler->getInvertMultiplier() * (idx * scan_handler->getScan().angle_increment / vm_ratio + scan_handler->getScan().angle_min) + scan_handler->getPose().theta;
 	Vector2<double> rotation(cos(th), sin(th));
 	Vector2<double> max_hitPoint = Vector2<double>::sum(rotation.scale(v_max_range), pose_world);
 	boost::optional<Vector2<int32_t>> hitOptional = grid->virtualRayCasting(pose_grid, grid->worldToGrid(max_hitPoint));
@@ -428,7 +428,7 @@ std::vector<int> MapChangeDetection::findAnomalousMeasurements(const Vector2<dou
 					idx = j - k;
 				else
 					idx = v_hitPoints.size() + j - k;	// assuming a 360 lidar. If it's not the case, the following two 'if' should be skipped
-				
+
 				if (!v_hitPoint_computed.at(idx)) {
 					v_hitPoint_computed.at(idx) = true;
 					v_hitPoints.at(idx) = computeVirtualHitPoint(idx, pose_world, pose_grid);
@@ -445,7 +445,7 @@ std::vector<int> MapChangeDetection::findAnomalousMeasurements(const Vector2<dou
 					idx = j + k;
 				else
 					idx = j + k - v_hitPoints.size();	// assuming a 360 lidar. If it's not the case, the following two 'if' should be skipped
-				
+
 				if (!v_hitPoint_computed.at(idx)) {
 					v_hitPoint_computed.at(idx) = true;
 					v_hitPoints.at(idx) = computeVirtualHitPoint(idx, pose_world, pose_grid);
@@ -470,15 +470,15 @@ std::vector<int> MapChangeDetection::findAnomalousMeasurements(const Vector2<dou
 							idx = j - k;
 						else
 							idx = v_hitPoints.size() + j - k;
-						
+
 						if (v_hitPoints.at(idx))
 							tmp_points.push_back(v_hitPoints.at(idx).get());
-						
+
 						if (j + k < v_hitPoints.size())
 							idx = j + k;
 						else
 							idx = j + k - v_hitPoints.size();
-						
+
 						if (v_hitPoints.at(idx))
 							tmp_points.push_back(v_hitPoints.at(idx).get());
 					}
@@ -711,7 +711,7 @@ void MapChangeDetection::detectChanges() {
 		clearRvizMarkers();
 
 		updateRvizMarkers();
-		
+
 		publishRvizMarkers(scan_handler->getScan().header.stamp);
 	}
 	end_viz = ros::Time::now().toSec();

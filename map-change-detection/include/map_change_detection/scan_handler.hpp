@@ -17,6 +17,7 @@ class ScanHandler
 
 		inline const sensor_msgs::LaserScan& getScan() const	{	return scan;		}
 		inline const geometry_msgs::Pose2D& getPose() const		{	return robot_pose;	}
+		inline const int getInvertMultiplier() const            {   return invert_multiplier_; }
 
 		inline const int32_t& getBeamStep() const	{	return beam_step;	}
 		inline const int32_t& getValidBeams() const	{	return valid_beams;	}
@@ -46,11 +47,12 @@ class ScanHandler
 
 		float	beam_range;
 		int32_t	beam_step;
+		int invert_multiplier_;  // -1 if the lidar is mounted upside down, else 1
 
 		bool	new_scan;		// indicates whether this object has processed a new scan
 		bool	update_scan;	// indicates whether this object has to process a new scan
 
-		std::string	map_frame, base_frame;
+		std::string	map_frame, lidar_frame;
 
 		/** LaserScan callback. Read the scan and get the estimated robot pose corresponding to the measurement
 		 * @param msg */
