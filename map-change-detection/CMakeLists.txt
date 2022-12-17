@@ -9,6 +9,7 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   std_msgs
+  std_srvs
   nav_msgs
   roscpp
   sensor_msgs
@@ -32,12 +33,15 @@ add_message_files(
 add_service_files(
   FILES
   UpdateMap.srv
+  GetCurrMap.srv
 )
 
 # Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   std_msgs
+  std_srvs
+  nav_msgs
 )
 
 catkin_package(

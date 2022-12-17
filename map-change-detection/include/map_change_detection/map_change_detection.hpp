@@ -47,7 +47,7 @@ class MapChangeDetection
 		int	vm_ratio;		// ratio between virtual beam and measured beam (consider vm_ratio virtual beams for each measured beam)
 		int8_t	search_window;	// number of virtual beams evaluated for pairing in both direction (thus the number of evaluated beams is 2*search_width+1)
 		float	v_max_range;		// max beam range considered for virtual measurements
-		float	max_anom_beam_frac;	// max allowed anomalous beams (expressed as a fraction of the total number of valid beams). The idea is that 
+		float	max_anom_beam_frac;	// max allowed anomalous beams (expressed as a fraction of the total number of valid beams). The idea is that
 									//		if too many beams are anomalous, maybe the robot is lost
 
 		// 'Normal' beams analysis
@@ -70,7 +70,7 @@ class MapChangeDetection
 		 * @param pose_grid - robot pose in grid coordinates */
 		inline boost::optional<Vector2<double>> computeVirtualHitPoint(const int& idx, const Vector2<double>& pose_world, const Vector2<int32_t>& pose_grid);
 
-		/** ---------------------------------------------------------------- 
+		/** ----------------------------------------------------------------
 		 * Update logic
 		 * ----------------------------------------------------------------- */
 		// Attributes related to the idle state induced by a quick rotation
@@ -87,13 +87,14 @@ class MapChangeDetection
 		float				min_linear_dist_squared, min_angular_dist;	// minimum displacement required in order to set 'robot_moved_enough' to true
 		bool				robot_moved_enough;	// whether the robot has moved enough since last scan processing. If true, a new scan MAY be processed
 		bool				update_last_odom;	// whether a new odom pose has to be accepted (normally set to true if a scan has been processed)
-		
+
 		ros::Time	last_processed_time;	// time w.r.t. which the elapsed time is measured. It is normally given by the timestamp of the last processed scan
 		bool 		enough_time_elapsed;	// whether enough time is elapsed since last scan processing. If true, a new scan MAY be processed
 		double		min_elapsed_time;		// minimum amount of time that has to elapse in order to set 'enough_time_elapsed' to true
 
+		ros::Timer ref_map_update_timer_;   // Timer used to keep track when to update ref map
 
-		// Functions 
+		// Functions
 		/** Reset the update logic
 		 * @param time - time instant from which elapsed time will be measured after the reset */
 		inline void resetUpdateLogic(const ros::Time& time);
@@ -102,7 +103,11 @@ class MapChangeDetection
 		 * @param msg */
 		void odomCallback(const nav_msgs::Odometry& msg);
 
-		/** ---------------------------------------------------------------- 
+		void updateRefMapCallback(const ros::TimerEvent &e);
+
+		bool updateRefMap();
+
+		/** ----------------------------------------------------------------
 		 * Rviz functions
 		 * ----------------------------------------------------------------- */
 

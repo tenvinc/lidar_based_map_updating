@@ -11,6 +11,12 @@ map_updater:
 
   update_map_online: true
 
+  # Determines if the initial map used for anomalous detection should be updated
+  ref_map_update_online: true
+  # period to be used to update initial map in seconds, should be kept long enough to keep track of long term changes,
+  # and avoid updating initial reference map for shorter term changes
+  ref_map_update_period: 60.0
+
   init_buffers: false
 
   min_angle_increment: 0.1 #0.5  # expressed in degrees, it determines the considered beams number

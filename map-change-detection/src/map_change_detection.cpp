@@ -2,6 +2,8 @@
 #include "map_change_detection/efficient_cell_store.hpp"
 
 #include <map_change_detection/ChangedCells.h>
+#include <map_change_detection/GetCurrMap.h>
+#include <std_srvs/Empty.h>
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <numeric>
@@ -15,6 +17,8 @@ MapChangeDetection::MapChangeDetection(ros::NodeHandle* nodehandle) :	nh_(*nodeh
 {
 	std::string	map_topic, map_frame, odom_topic;
 	double		min_linear_dist, search_width_ang, v_range_tol, w_idle_dist, range1, range2, pair_dist1, pair_dist2, radius1, radius2;
+	double ref_map_update_period;
+	bool ref_map_update_online;
 
 	ROS_INFO("Calling node constructor...");
 
@@ -79,6 +83,12 @@ MapChangeDetection::MapChangeDetection(ros::NodeHandle* nodehandle) :	nh_(*nodeh
 	nh_.getParam("update_map_online", online_update);
 
 	update_map_service = nh_.advertiseService("update_map", &MapChangeDetection::serviceCallback, this);
+
+	nh_.getParam("ref_map_update_online", ref_map_update_online);
+	nh_.getParam("ref_map_update_period", ref_map_update_period);
+	if (ref_map_update_online) {
+		ref_map_update_timer_ = nh_.createTimer(ros::Duration(ref_map_update_period), &MapChangeDetection::updateRefMapCallback, this);
+	}
 
 	if (visualization_mode || debug_visualization)
 		initializeRvizStuff(map_frame);
@@ -611,6 +621,8 @@ void MapChangeDetection::detectChanges() {
 		return;
 	}
 
+	ROS_INFO("Anomalous beams: %d, Max frac: %f, Valid beams: %d", anomalous_idxs.size(), max_anom_beam_frac, scan_handler->getValidBeams());
+
 	// Anomalous points analysis: detect cell transistions that explain the measured range
 	tmp_start = ros::Time::now().toSec();
 	std::vector<bool> column (grid->getHeight(), false);
@@ -803,4 +815,28 @@ void MapChangeDetection::odomCallback(const nav_msgs::Odometry& msg) {
 				robot_moved_enough = true;
 		}
 	}
+}
+
+void MapChangeDetection::updateRefMapCallback(const ros::TimerEvent &e) {
+	ROS_WARN("Time to update the reference map...");
+	if (!updateRefMap()) {
+		ROS_ERROR("Failed to update ref map. Skipping current one");
+		return;
+	}
+	ROS_INFO("Updated ref map successfully");
+}
+
+bool MapChangeDetection::updateRefMap() {
+	map_change_detection::GetCurrMap srv_call;
+	if (!ros::service::call("updated_map_processer/get_curr_map", srv_call)) {
+		ROS_ERROR("Service call to get_curr_map failed");
+		return false;
+	}
+	std_srvs::Empty upd_srv_call;
+	if (!ros::service::call("updated_map_processer/update_initial_map", upd_srv_call)) {
+		ROS_ERROR("service call to update_init_map failed");
+		return false;
+	}
+	grid.reset(new Grid(&nh_, srv_call.response.online_map));
+	return true;
 }
