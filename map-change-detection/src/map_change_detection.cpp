@@ -138,6 +138,11 @@ bool MapChangeDetection::serviceCallback(map_change_detection::UpdateMap::Reques
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MapChangeDetection::initializeRvizStuff(const std::string& fixed_frame) {
+	using RGB = std::array<float, 3>;
+	const RGB YELLOW({1.0, 0.8, 0.2});
+	const RGB GREEN({0.0, 1.0, 0.0});
+	const RGB RED({1.0, 0.0, 0.0});
+
 	pub_marker = nh_.advertise<visualization_msgs::Marker>("/marker", 10, true);
 
 	if(debug_visualization) {
@@ -150,9 +155,9 @@ void MapChangeDetection::initializeRvizStuff(const std::string& fixed_frame) {
 		m_marker.scale.x = 0.15;
 		m_marker.scale.y = 0.15;
 		m_marker.scale.z = 0.15;
-		m_marker.color.r = 1.0;
-		m_marker.color.g = 0.8;
-		m_marker.color.b = 0.2;
+		m_marker.color.r = YELLOW.at(0);
+		m_marker.color.g = YELLOW.at(1);
+		m_marker.color.b = YELLOW.at(2);
 		m_marker.color.a = 0.4;
 
 		v_marker.header.frame_id = fixed_frame;
@@ -164,9 +169,9 @@ void MapChangeDetection::initializeRvizStuff(const std::string& fixed_frame) {
 		v_marker.scale.x = 0.15;
 		v_marker.scale.y = 0.15;
 		v_marker.scale.z = 0.15;
-		v_marker.color.r = 0.0;
-		v_marker.color.g = 1.0;
-		v_marker.color.b = 0.0;
+		v_marker.color.r = GREEN.at(0);
+		v_marker.color.g = GREEN.at(1);
+		v_marker.color.b = GREEN.at(2);
 		v_marker.color.a = 0.4;
 
 		lines.header.frame_id = fixed_frame;
@@ -176,10 +181,10 @@ void MapChangeDetection::initializeRvizStuff(const std::string& fixed_frame) {
 		lines.type = visualization_msgs::Marker::LINE_LIST;
 		lines.pose.orientation.w = 1;
 		lines.scale.x = 0.03;
-		lines.color.r = 1.0;
-		lines.color.g = 0.0;
-		lines.color.b = 0.0;
-		lines.color.a = 1.0;
+		lines.color.r = RED.at(0);
+		lines.color.g = RED.at(1);
+		lines.color.b = RED.at(2);
+		lines.color.a = 0.2;
 
 		unpaired_marker.header.frame_id = fixed_frame;
 		unpaired_marker.ns = "hit_visualization";
@@ -190,9 +195,9 @@ void MapChangeDetection::initializeRvizStuff(const std::string& fixed_frame) {
 		unpaired_marker.scale.x = 0.25;
 		unpaired_marker.scale.y = 0.25;
 		unpaired_marker.scale.z = 0.25;
-		unpaired_marker.color.r = 1.0;
-		unpaired_marker.color.g = 0.8;
-		unpaired_marker.color.b = 0.2;
+		unpaired_marker.color.r = YELLOW.at(0);
+		unpaired_marker.color.g = YELLOW.at(1);
+		unpaired_marker.color.b = YELLOW.at(2);
 		unpaired_marker.color.a = 1.0;
 
 		evaluated_marker.header.frame_id = fixed_frame;
@@ -204,9 +209,12 @@ void MapChangeDetection::initializeRvizStuff(const std::string& fixed_frame) {
 		evaluated_marker.scale.x = 0.25;
 		evaluated_marker.scale.y = 0.25;
 		evaluated_marker.scale.z = 0.25;
-		evaluated_marker.color.r = 0.0;
-		evaluated_marker.color.g = 1.0;
-		evaluated_marker.color.b = 0.0;
+		evaluated_marker.scale.x = 0.25;
+		evaluated_marker.scale.y = 0.25;
+		evaluated_marker.scale.z = 0.25;
+		evaluated_marker.color.r = GREEN.at(0);
+		evaluated_marker.color.g = GREEN.at(1);
+		evaluated_marker.color.b = GREEN.at(2);
 		evaluated_marker.color.a = 1.0;
 	}
 
@@ -219,9 +227,9 @@ void MapChangeDetection::initializeRvizStuff(const std::string& fixed_frame) {
 		occ_marker.pose.orientation.w = 1;
 		occ_marker.scale.x = 0.05;
 		occ_marker.scale.y = 0.05;
-		occ_marker.color.r = 1.0;
-		occ_marker.color.g = 0.0;
-		occ_marker.color.b = 0.0;
+		occ_marker.color.r = RED.at(0);
+		occ_marker.color.g = RED.at(1);
+		occ_marker.color.b = RED.at(2);
 		occ_marker.color.a = 1.0;
 
 		free_marker.header.frame_id = fixed_frame;
@@ -232,9 +240,9 @@ void MapChangeDetection::initializeRvizStuff(const std::string& fixed_frame) {
 		free_marker.pose.orientation.w = 1;
 		free_marker.scale.x = 0.05;
 		free_marker.scale.y = 0.05;
-		free_marker.color.r = 0.0;
-		free_marker.color.g = 1.0;
-		free_marker.color.b = 0.0;
+		free_marker.color.r = GREEN.at(0);
+		free_marker.color.g = GREEN.at(1);
+		free_marker.color.b = GREEN.at(2);
 		free_marker.color.a = 1.0;
 
 		col_free.g = 1.0;
